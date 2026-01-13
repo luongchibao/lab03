@@ -12,7 +12,23 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
+    // GET ALL
     public List<Student> getAllStudents() {
         return studentRepository.findAll();
+    }
+
+    // CREATE + UPDATE
+    public Student save(Student student) {
+        return studentRepository.save(student);
+    }
+
+    // DELETE
+    public void deleteById(int id) {
+        studentRepository.deleteById(id);
+    }
+
+    // SEARCH BY NAME
+    public List<Student> findByName(String name) {
+        return studentRepository.findByNameContainingIgnoreCase(name);
     }
 }
