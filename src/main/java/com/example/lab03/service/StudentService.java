@@ -31,4 +31,9 @@ public class StudentService {
     public List<Student> findByName(String name) {
         return studentRepository.findByNameContainingIgnoreCase(name);
     }
+
+    public Student getById(int id) {
+        return studentRepository.findById(id).orElse(null);
+    }
+
 }
