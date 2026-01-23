@@ -1,110 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý sinh viên</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-4">
-
-<h3>DANH SÁCH SINH VIÊN</h3>
-
-<input type="text" id="search" class="form-control mb-3"
-       placeholder="Tìm theo tên..." onkeyup="searchStudent()">
-
-<table class="table table-bordered">
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Tên</th>
-        <th>Tuổi</th>
-        <th>Email</th>
-        <th>Hành động</th>
-    </tr>
-    </thead>
-    <tbody id="studentTable"></tbody>
-</table>
-
-<h4>Thêm sinh viên</h4>
-<input id="id" class="form-control mb-2" placeholder="ID">
-<input id="name" class="form-control mb-2" placeholder="Tên">
-<input id="age" class="form-control mb-2" placeholder="Tuổi">
-<input id="email" class="form-control mb-2" placeholder="Email">
-
-<button class="btn btn-primary" onclick="addStudent()">Thêm</button>
-
-<script>
-const API = "http://localhost:8080/api/students";
-
-function loadStudents() {
-    fetch(API)
-        .then(res => res.json())
-        .then(data => {
-            let html = "";
-            data.forEach(s => {
-                html += `
-                <tr>
-                    <td>${s.id}</td>
-                    <td>${s.name}</td>
-                    <td>${s.age}</td>
-                    <td>${s.email}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm"
-                            onclick="deleteStudent(${s.id})">Xóa</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById("studentTable").innerHTML = html;
-        });
-}
-
-function addStudent() {
-    const student = {
-        id: document.getElementById("id").value,
-        name: document.getElementById("name").value,
-        age: document.getElementById("age").value,
-        email: document.getElementById("email").value
-    };
-
-    fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(student)
-    }).then(() => loadStudents());
-}
-
-function deleteStudent(id) {
-    fetch(`${API}/${id}`, { method: "DELETE" })
-        .then(() => loadStudents());
-}
-
-function searchStudent() {
-    const name = document.getElementById("search").value;
-    fetch(`${API}/search?name=${name}`)
-        .then(res => res.json())
-        .then(data => {
-            let html = "";
-            data.forEach(s => {
-                html += `
-                <tr>
-                    <td>${s.id}</td>
-                    <td>${s.name}</td>
-                    <td>${s.age}</td>
-                    <td>${s.email}</td>
-                    <td></td>
-                </tr>`;
-            });
-            document.getElementById("studentTable").innerHTML = html;
-        });
-}
-
-loadStudents();
-</script>
-
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -117,8 +10,8 @@ loadStudents();
 
 <h3>DANH SÁCH SINH VIÊN</h3>
 
-<input type="text" id="search" class="form-control mb-3"
-       placeholder="Tìm theo tên..." onkeyup="searchStudent()">
+<input type="number" id="searchId" class="form-control mb-3"
+       placeholder="Tìm theo ID..." onkeyup="searchById()">
 
 <table class="table table-bordered">
     <thead>
@@ -139,8 +32,8 @@ loadStudents();
 <input id="age" class="form-control mb-2" placeholder="Tuổi">
 <input id="email" class="form-control mb-2" placeholder="Email">
 
-<button class="btn btn-primary" onclick="addStudent()">Thêm</button>
-<button class="btn btn-warning" onclick="updateStudent()">Cập nhật</button>
+<button type="button" class="btn btn-primary" onclick="addStudent()">Thêm</button>
+<button type="button" class="btn btn-warning" onclick="updateStudent()">Cập nhật</button>
 
 <script>
 const API = "http://localhost:8080/api/students";
@@ -152,7 +45,7 @@ function loadStudents() {
         .then(data => renderTable(data));
 }
 
-//THÊM SINH VIÊN
+// THÊM
 function addStudent() {
     const student = getFormData();
     fetch(API, {
@@ -162,7 +55,7 @@ function addStudent() {
     }).then(loadStudents);
 }
 
-// CẬP NHẬT SINH VIÊN
+// CẬP NHẬT
 function updateStudent() {
     const student = getFormData();
     fetch(`${API}/update/${student.id}`, {
@@ -172,18 +65,45 @@ function updateStudent() {
     }).then(loadStudents);
 }
 
-// XÓA SINH VIÊN
+// XÓA
 function deleteStudent(id) {
     fetch(`${API}/delete/${id}`, { method: "POST" })
         .then(loadStudents);
 }
 
-// TÌM KIẾM
-function searchStudent() {
-    const name = document.getElementById("search").value;
-    fetch(`${API}/search?name=${name}`)
-        .then(res => res.json())
-        .then(data => renderTable(data));
+// 🔍 TÌM KIẾM THEO ID (YÊU CẦU 10)
+function searchById() {
+    const id = document.getElementById("searchId").value;
+
+    if (id === "") {
+        loadStudents();
+        return;
+    }
+
+    fetch(`${API}/${id}`)
+        .then(res => {
+            if (!res.ok) {
+                document.getElementById("studentTable").innerHTML = "";
+                return;
+            }
+            return res.json();
+        })
+        .then(s => {
+            if (!s) return;
+
+            const html = `
+            <tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.age}</td>
+                <td>${s.email}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                        onclick="deleteStudent(${s.id})">Xóa</button>
+                </td>
+            </tr>`;
+            document.getElementById("studentTable").innerHTML = html;
+        });
 }
 
 function renderTable(data) {
