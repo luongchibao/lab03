@@ -7,7 +7,7 @@
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome (ICON) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -19,23 +19,30 @@
             font-family: 'Poppins', sans-serif;
             background: #f4f6f9;
         }
+
         .navbar-brand {
             font-weight: 600;
         }
+
         .card {
             border: none;
             border-radius: 12px;
         }
+
         .table thead {
             background-color: #0d6efd;
             color: white;
         }
+
         .btn {
             border-radius: 8px;
         }
-        .form-control, .input-group-text {
+
+        .form-control,
+        .input-group-text {
             border-radius: 8px;
         }
+
         footer {
             font-size: 14px;
         }
@@ -68,10 +75,12 @@
                             Danh sách sinh viên
                         </h5>
 
-                        <input type="number" id="searchId"
+                        <!-- SEARCH BY NAME -->
+                        <input type="text"
+                               id="searchName"
                                class="form-control w-50"
-                               placeholder="🔍 Tìm theo ID..."
-                               onkeyup="searchById()">
+                               placeholder="🔍 Tìm theo tên..."
+                               onkeyup="searchByName()">
                     </div>
 
                     <table class="table table-hover align-middle">
@@ -102,32 +111,46 @@
                     </h5>
 
                     <div class="input-group mb-2">
-                        <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
                         <input id="id" class="form-control" placeholder="ID">
                     </div>
 
                     <div class="input-group mb-2">
-                        <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
                         <input id="name" class="form-control" placeholder="Họ tên">
                     </div>
 
                     <div class="input-group mb-2">
-                        <span class="input-group-text"><i class="fa-solid fa-cake-candles"></i></span>
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-cake-candles"></i>
+                        </span>
                         <input id="age" class="form-control" placeholder="Tuổi">
                     </div>
 
                     <div class="input-group mb-3">
-                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <span class="input-group-text">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
                         <input id="email" class="form-control" placeholder="Email">
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" onclick="addStudent()">
-                            <i class="fa-solid fa-plus me-1"></i> Thêm sinh viên
+                        <button type="button"
+                                class="btn btn-primary"
+                                onclick="addStudent()">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Thêm sinh viên
                         </button>
 
-                        <button type="button" class="btn btn-warning" onclick="updateStudent()">
-                            <i class="fa-solid fa-rotate me-1"></i> Cập nhật sinh viên
+                        <button type="button"
+                                class="btn btn-warning"
+                                onclick="updateStudent()">
+                            <i class="fa-solid fa-rotate me-1"></i>
+                            Cập nhật sinh viên
                         </button>
                     </div>
 
@@ -144,7 +167,8 @@
 </footer>
 
 <script>
-const API = "/api/students";
+
+const API = "/students";
 
 // LOAD ALL
 function loadStudents() {
@@ -156,70 +180,86 @@ function loadStudents() {
 // ADD
 function addStudent() {
     const student = getFormData();
+
     fetch(API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(student)
-    }).then(loadStudents);
+    })
+    .then(() => {
+        loadStudents();
+        clearForm();
+    });
 }
 
 // UPDATE
 function updateStudent() {
     const student = getFormData();
+
     fetch(`${API}/update/${student.id}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify(student)
-    }).then(loadStudents);
+    })
+    .then(loadStudents);
 }
 
 // DELETE
 function deleteStudent(id) {
-    fetch(`${API}/delete/${id}`, { method: "POST" })
-        .then(loadStudents);
+    fetch(`${API}/delete/${id}`, {
+        method: "POST"
+    })
+    .then(loadStudents);
 }
 
-// SEARCH BY ID
-function searchById() {
-    const id = document.getElementById("searchId").value;
-    if (id === "") {
+// SEARCH BY NAME
+function searchByName() {
+
+    const name = document.getElementById("searchName").value;
+
+    if (name.trim() === "") {
         loadStudents();
         return;
     }
 
-    fetch(`${API}/${id}`)
-        .then(res => res.ok ? res.json() : null)
-        .then(s => {
-            if (!s) {
-                document.getElementById("studentTable").innerHTML = "";
-                return;
-            }
-            renderTable([s]);
-        });
+    fetch(`${API}/search?name=${name}`)
+        .then(res => res.json())
+        .then(data => renderTable(data));
 }
 
 // RENDER TABLE
 function renderTable(data) {
+
     let html = "";
+
     data.forEach(s => {
+
         html += `
         <tr>
             <td>${s.id}</td>
             <td>${s.name}</td>
             <td>${s.age}</td>
             <td>${s.email}</td>
+
             <td>
                 <button class="btn btn-sm btn-outline-danger"
-                        title="Xóa sinh viên"
                         onclick="deleteStudent(${s.id})">
+
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>
-        </tr>`;
+        </tr>
+        `;
     });
+
     document.getElementById("studentTable").innerHTML = html;
 }
 
+// FORM DATA
 function getFormData() {
     return {
         id: document.getElementById("id").value,
@@ -229,7 +269,17 @@ function getFormData() {
     };
 }
 
+// CLEAR FORM
+function clearForm() {
+    document.getElementById("id").value = "";
+    document.getElementById("name").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("email").value = "";
+}
+
+// LOAD DATA
 loadStudents();
+
 </script>
 
 </body>

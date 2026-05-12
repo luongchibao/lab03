@@ -39,9 +39,15 @@ public class StudentController {
         return repository.findAll();
     }
 
+    @GetMapping("/search")
+    public List<Student> searchByName(@RequestParam String name) {
+        return repository.findByNameContainingIgnoreCase(name);
+    }
+
     // POST
     @PostMapping
     public Student createStudent(@RequestBody Student student) {
         return repository.save(student);
     }
+
 }
